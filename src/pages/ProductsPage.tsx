@@ -79,7 +79,7 @@ const ProductsPage = () => {
     setEditingId(product.id);
     setForm({
       name: product.name,
-      description: product.description,
+      description: product.description ?? '',
       price: String(product.price),
       file: null,
       preview: null,
@@ -116,7 +116,7 @@ const ProductsPage = () => {
       if (editingId) {
         const updated = await updateProduct(editingId, {
           name: form.name,
-          description: form.description,
+          description: form.description || undefined,
           price: Number(form.price),
           ...(imagePath ? { image: imagePath } : {}),
         });
@@ -124,16 +124,11 @@ const ProductsPage = () => {
           prev.map((p) => (p.id === editingId ? updated : p))
         );
       } else {
-        if (!imagePath) {
-          setError('Загрузите изображение товара');
-          setIsSubmitting(false);
-          return;
-        }
         const created = await createProduct({
           name: form.name,
-          description: form.description,
+          description: form.description || undefined,
           price: Number(form.price),
-          image: imagePath,
+          ...(imagePath ? { image: imagePath } : {}),
           restaurantId: restaurant.id,
         });
         setProducts((prev) => [created, ...prev]);
@@ -209,19 +204,25 @@ const ProductsPage = () => {
                 className="bg-white rounded-2xl border border-orange-100 shadow-sm p-3 flex gap-3"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <img
-                    src={getImageUrl(product.image)}
-                    alt={product.name}
-                    className="w-full h-full object-contain"
-                  />
+                  {product.image ? (
+                    <img
+                      src={getImageUrl(product.image)}
+                      alt={product.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-2xl">🍽️</span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 truncate">
                     {product.name}
                   </p>
-                  <p className="text-xs text-gray-400 line-clamp-2">
-                    {product.description}
-                  </p>
+                  {product.description && (
+                    <p className="text-xs text-gray-400 line-clamp-2">
+                      {product.description}
+                    </p>
+                  )}
                   <p className="text-sm font-bold text-orange-600 mt-1">
                     {product.price} ₽
                   </p>
@@ -280,14 +281,14 @@ const ProductsPage = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Описание
+                  Описание{' '}
+                  <span className="text-gray-400 font-normal">(необязательно)</span>
                 </label>
                 <textarea
                   value={form.description}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, description: e.target.value }))
                   }
-                  required
                   rows={3}
                   className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-shadow"
                 />
@@ -312,7 +313,8 @@ const ProductsPage = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Фото
+                  Фото{' '}
+                  <span className="text-gray-400 font-normal">(необязательно)</span>
                 </label>
                 <input
                   type="file"
@@ -320,13 +322,17 @@ const ProductsPage = () => {
                   onChange={handleFileChange}
                   className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 file:cursor-pointer cursor-pointer"
                 />
-                {(form.preview || form.existingImage) && (
+                {(form.preview || form.existingImage) ? (
                   <div className="w-full h-40 bg-gray-100 rounded-xl mt-3 flex items-center justify-center overflow-hidden">
                     <img
                       src={form.preview || getImageUrl(form.existingImage)}
                       alt="preview"
                       className="w-full h-full object-contain"
                     />
+                  </div>
+                ) : (
+                  <div className="w-full h-40 bg-gray-100 rounded-xl mt-3 flex items-center justify-center">
+                    <span className="text-4xl">🍽️</span>
                   </div>
                 )}
               </div>

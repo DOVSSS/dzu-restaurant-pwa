@@ -17,9 +17,9 @@ export interface Product {
   id: string;
   name: string;
   slug: string;
-  description: string;
+   description: string | null; 
   price: number;
-  image: string;
+  image: string | null;  
   restaurantId: string;
 }
 
@@ -41,9 +41,9 @@ export interface CreateRestaurantRequest {
 
 export interface CreateProductRequest {
   name: string;
-  description: string;
+  description?: string;
   price: number;
-  image: string;
+  image?: string;
   restaurantId: string;
 }
 
